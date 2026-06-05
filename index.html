@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A simple, private expense tracker that runs in your browser." />
+  <title>💰 Rukku's Expense Tracker</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>💰 Rukku's Expense Tracker</h1>
+      <p class="subtitle">Track where your money goes — private & saved on your device</p>
+    </header>
+
+    <!-- Summary cards -->
+    <section class="summary">
+      <div class="card total">
+        <span class="card-label">Total spent</span>
+        <span class="card-value" id="totalSpent">$0.00</span>
+      </div>
+      <div class="card count">
+        <span class="card-label">Expenses</span>
+        <span class="card-value" id="expenseCount">0</span>
+      </div>
+      <div class="card top">
+        <span class="card-label">Top category</span>
+        <span class="card-value" id="topCategory">—</span>
+      </div>
+    </section>
+
+    <!-- Add / edit expense form (full width) -->
+    <section class="add-panel">
+      <h2 id="formTitle">Add an expense</h2>
+      <form id="expenseForm" autocomplete="off">
+        <input type="hidden" id="editId" value="" />
+        <div class="form-row">
+          <input type="text" id="descInput" placeholder="What did you buy? (e.g. Coffee)" required />
+          <input type="number" id="amountInput" placeholder="Amount" min="0.01" step="0.01" required />
+        </div>
+        <div class="category-chips" id="categoryChips" role="group" aria-label="Choose a category">
+          <button type="button" class="chip" data-category="Food">🍔 Food</button>
+          <button type="button" class="chip" data-category="Transport">🚗 Transport</button>
+          <button type="button" class="chip" data-category="Shopping">🛍️ Shopping</button>
+          <button type="button" class="chip" data-category="Bills">🧾 Bills</button>
+          <button type="button" class="chip" data-category="Fun">🎮 Fun</button>
+          <button type="button" class="chip" data-category="Health">💊 Health</button>
+          <button type="button" class="chip" data-category="Other">📦 Other</button>
+        </div>
+        <input type="hidden" id="categoryInput" value="Food" />
+        <div class="form-row">
+          <input type="date" id="dateInput" />
+        </div>
+        <div class="form-row">
+          <button type="submit" id="submitBtn">+ Add</button>
+          <button type="button" id="cancelEditBtn" class="secondary-btn" hidden>Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Budget + breakdown side by side -->
+    <div class="main-grid">
+      <!-- Budget -->
+      <section class="budget-panel grid-cell">
+        <div class="budget-head">
+          <h2>Monthly budget</h2>
+          <div class="budget-edit">
+            <span class="currency-symbol" id="budgetSymbol">$</span>
+            <input type="number" id="budgetInput" min="0" step="1" placeholder="Set a budget" />
+          </div>
+        </div>
+        <div class="budget-track"><div class="budget-fill" id="budgetFill"></div></div>
+        <p class="budget-meta" id="budgetMeta">No budget set — add one to track your limit.</p>
+
+        <div class="budget-stats" id="budgetStats">
+          <div class="budget-emoji" id="budgetEmoji">💡</div>
+          <div class="budget-figures" id="budgetFigures" hidden>
+            <div class="bfig"><span class="bfig-val" id="bSpent">—</span><span class="bfig-label">spent</span></div>
+            <div class="bfig"><span class="bfig-val" id="bRemaining">—</span><span class="bfig-label">left</span></div>
+            <div class="bfig"><span class="bfig-val" id="bPct">—</span><span class="bfig-label">used</span></div>
+          </div>
+          <p class="budget-hint" id="budgetHint">Set a monthly budget to track your spending.</p>
+        </div>
+      </section>
+
+      <!-- Category breakdown (donut) -->
+      <section class="breakdown grid-cell" id="breakdownSection">
+        <h2>Spending by category</h2>
+        <div class="donut-wrap" id="donutWrap">
+          <div class="donut-chart">
+            <div class="donut" id="donut"></div>
+            <div class="donut-center">
+              <strong id="donutTotal">$0</strong>
+              <span>total</span>
+            </div>
+          </div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <p class="empty" id="breakdownEmpty">Add expenses to see your breakdown 🍩</p>
+      </section>
+    </div>
+
+    <!-- Controls: search + filter + export/import -->
+    <section class="controls-panel">
+      <div class="controls-row">
+        <input type="search" id="searchInput" placeholder="🔍 Search expenses…" />
+        <select id="filterCategory">
+          <option value="">All categories</option>
+          <option value="Food">🍔 Food</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="Bills">🧾 Bills</option>
+          <option value="Fun">🎮 Fun</option>
+          <option value="Health">💊 Health</option>
+          <option value="Other">📦 Other</option>
+        </select>
+        <select id="filterMonth">
+          <option value="">All months</option>
+        </select>
+      </div>
+      <div class="controls-row secondary">
+        <label class="currency-pick">
+          Currency:
+          <select id="currencySelect">
+            <option value="$">$ USD</option>
+            <option value="₹">₹ INR</option>
+            <option value="€">€ EUR</option>
+            <option value="£">£ GBP</option>
+            <option value="¥">¥ JPY</option>
+          </select>
+        </label>
+        <div class="data-buttons">
+          <button type="button" id="exportBtn" class="ghost-btn">⬇ Export CSV</button>
+          <button type="button" id="importBtn" class="ghost-btn">⬆ Import CSV</button>
+          <input type="file" id="importFile" accept=".csv" hidden />
+        </div>
+      </div>
+    </section>
+
+    <!-- Expense list -->
+    <section class="list-panel">
+      <div class="list-header">
+        <h2>Expenses <span class="muted-count" id="shownCount"></span></h2>
+        <button id="clearAllBtn" class="link-btn" hidden>Clear all</button>
+      </div>
+      <ul id="expenseList"></ul>
+      <p id="emptyState" class="empty">No expenses yet. Add your first one above! 👆</p>
+      <p id="noMatchState" class="empty" hidden>No expenses match your search/filter. 🔎</p>
+    </section>
+
+    <footer>
+      <p>Your data is saved privately in this browser. Nothing is sent anywhere.</p>
+    </footer>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastHost" class="toast-host" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
