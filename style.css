@@ -318,9 +318,12 @@ footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 
 @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes toastOut { to { opacity: 0; transform: translateY(12px); } }
 
-/* Collapse the two columns on narrower screens */
+/* Collapse the two columns on narrower screens.
+   Switch the grid to plain block flow so these two panels are full-width
+   and align exactly like every other panel (same edges, same spacing). */
 @media (max-width: 760px) {
-  .main-grid { grid-template-columns: 1fr; }
+  .main-grid { display: block; margin-bottom: 0; }
+  .main-grid > .grid-cell { margin-bottom: 20px !important; }
 }
 
 /* ===== Mobile / small screens ===== */
