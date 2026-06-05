@@ -82,7 +82,7 @@ const toastHost = $("toastHost");
 
 // --- State ---
 let expenses = load(STORAGE_KEY, []);
-let settings = load(SETTINGS_KEY, { currency: "$", budget: 0 });
+let settings = load(SETTINGS_KEY, { currency: "₹", budget: 0 });
 
 // --- Storage helpers ---
 function load(key, fallback) {
