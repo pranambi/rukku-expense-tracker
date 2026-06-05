@@ -323,11 +323,43 @@ footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 
   .main-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 520px) {
-  .summary { grid-template-columns: 1fr; }
-  .form-row, .controls-row { flex-wrap: wrap; }
-  .form-row > * , #searchInput, #filterCategory, #filterMonth { flex: 1 1 100%; }
-  .controls-row.secondary { flex-direction: column; align-items: stretch; }
+/* ===== Mobile / small screens ===== */
+@media (max-width: 560px) {
+  body { padding: 16px 12px 48px; }
+  header { margin-bottom: 20px; }
+  header h1 { font-size: 1.55rem; }
+  .subtitle { font-size: .9rem; }
+
+  /* Reclaim width: tighter panel padding */
+  section.add-panel, section.list-panel, section.breakdown,
+  section.budget-panel, section.controls-panel { padding: 16px; }
+
+  /* Summary cards stack */
+  .summary { grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; }
+  .card { flex-direction: row; justify-content: space-between; align-items: center; }
+  .card-label { font-size: .85rem; }
+
+  /* Form + controls: every field goes full width (IDs beat the base rules here) */
+  .form-row, .controls-row { flex-wrap: wrap; gap: 10px; }
+  #descInput, #amountInput, #dateInput,
+  #submitBtn, #cancelEditBtn,
+  #searchInput, #filterCategory, #filterMonth {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  /* Secondary controls (currency + export/import) stack neatly */
+  .controls-row.secondary { flex-direction: column; align-items: stretch; gap: 12px; }
+  .currency-pick { justify-content: space-between; }
   .data-buttons { margin-left: 0; }
   .ghost-btn { flex: 1; }
+
+  /* Donut sits above its legend, centered */
+  .donut-wrap { flex-direction: column; gap: 16px; }
+  .legend { width: 100%; min-width: 0; }
+
+  /* Expense rows: let the description wrap instead of being cut off */
+  li.expense { gap: 10px; flex-wrap: wrap; }
+  .exp-desc { white-space: normal; }
+  .exp-main { flex: 1 1 60%; }
 }
