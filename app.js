@@ -517,20 +517,29 @@ function renderDonut(byCategory, total) {
       else hiddenCategories.add(cat);
       const { byCategory: bc, total: t } = getStats();
       renderDonut(bc, t);
+      renderSummaryCards(bc);
     });
     legendEl.appendChild(row);
   }
 }
 
+function renderSummaryCards(byCategory) {
+  const visibleEntries = Object.entries(byCategory).filter(([cat]) => !hiddenCategories.has(cat));
+  const visibleTotal = visibleEntries.reduce((s, [, a]) => s + a, 0);
+  let topCat = null, topAmt = 0;
+  for (const [c, a] of visibleEntries) if (a > topAmt) { topAmt = a; topCat = c; }
+  totalSpentEl.textContent = money(visibleTotal);
+  expenseCountEl.textContent = expenses.filter((e) => !e.credit && !hiddenCategories.has(e.category)).length;
+  topCategoryEl.textContent = topCat ? `${CATEGORY_EMOJI[topCat]} ${topCat}` : "—";
+}
+
 function render() {
-  const { total, totalIncome, byCategory, topCategory } = getStats();
+  const { totalIncome, byCategory } = getStats();
 
-  totalSpentEl.textContent = money(total);
   totalIncomeEl.textContent = money(totalIncome);
-  expenseCountEl.textContent = expenses.filter((e) => !e.credit).length;
-  topCategoryEl.textContent = topCategory ? `${CATEGORY_EMOJI[topCategory]} ${topCategory}` : "—";
+  renderSummaryCards(byCategory);
 
-  renderDonut(byCategory, total);
+  renderDonut(byCategory, Object.values(byCategory).reduce((s, a) => s + a, 0));
 
   refreshMonthFilter();
   renderBudget();
