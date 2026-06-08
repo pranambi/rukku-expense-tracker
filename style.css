@@ -179,6 +179,11 @@ input:focus, select:focus { border-color: var(--accent); }
   gap: 8px;
   margin-bottom: 10px;
 }
+.type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+.type-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ffffff20; background: var(--panel-2); color: var(--muted); cursor: pointer; font-size: .9rem; font-weight: 600; transition: background .15s, color .15s, border-color .15s; }
+.type-btn.active { background: linear-gradient(135deg, var(--accent-2), var(--accent)); border-color: transparent; color: #04240f; }
+.type-btn:not(.active):hover { border-color: var(--muted); color: var(--text); }
+
 .chip {
   flex: 0 0 auto;
   padding: 9px 14px;

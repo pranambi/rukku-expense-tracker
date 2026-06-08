@@ -32,6 +32,8 @@ const dateInput = $("dateInput");
 const formTitle = $("formTitle");
 const submitBtn = $("submitBtn");
 const cancelEditBtn = $("cancelEditBtn");
+const typeExpenseBtn = $("typeExpenseBtn");
+const typeIncomeBtn = $("typeIncomeBtn");
 
 const totalSpentEl = $("totalSpent");
 const totalIncomeEl = $("totalIncome");
@@ -94,6 +96,7 @@ const toastHost = $("toastHost");
 let expenses = load(STORAGE_KEY, []);
 let settings = load(SETTINGS_KEY, { currency: "₹", budget: 0 });
 let activeMonth = monthKey(Date.now());
+let incomeMode = false;
 
 // --- Storage helpers ---
 function load(key, fallback) {
@@ -139,12 +142,23 @@ categoryChips.addEventListener("click", (e) => {
   if (chip) setCategory(chip.dataset.category);
 });
 
+function setIncomeMode(on) {
+  incomeMode = on;
+  typeExpenseBtn.classList.toggle("active", !on);
+  typeIncomeBtn.classList.toggle("active", on);
+  categoryChips.hidden = on;
+  descInput.placeholder = on ? "What was this income? (e.g. Salary)" : "What did you buy? (e.g. Coffee)";
+  formTitle.textContent = on ? "Add income" : "Add an expense";
+}
+typeExpenseBtn.addEventListener("click", () => setIncomeMode(false));
+typeIncomeBtn.addEventListener("click", () => setIncomeMode(true));
+
 // ============ Add / Edit ============
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   const desc = descInput.value.trim();
   const amount = parseFloat(amountInput.value);
-  const category = categoryInput.value;
+  const category = incomeMode ? "Other" : categoryInput.value;
   const date = dateInput.value ? new Date(dateInput.value + "T12:00:00").getTime() : Date.now();
   if (!desc || isNaN(amount) || amount <= 0) return;
 
@@ -152,11 +166,13 @@ form.addEventListener("submit", (e) => {
   if (editingId) {
     const exp = expenses.find((x) => x.id === Number(editingId));
     if (exp) Object.assign(exp, { desc, amount, category, date });
-    toast("✏️ Expense updated");
+    toast("✏️ Updated");
     exitEditMode();
   } else {
-    expenses.unshift({ id: Date.now(), desc, amount, category, date });
-    toast("✅ Expense added");
+    const entry = { id: Date.now(), desc, amount, category, date };
+    if (incomeMode) entry.credit = true;
+    expenses.unshift(entry);
+    toast(incomeMode ? "💰 Income added" : "✅ Expense added");
   }
   saveExpenses();
   render();
@@ -169,13 +185,14 @@ form.addEventListener("submit", (e) => {
 function enterEditMode(id) {
   const exp = expenses.find((x) => x.id === id);
   if (!exp) return;
+  setIncomeMode(!!exp.credit);
   editIdInput.value = id;
   descInput.value = exp.desc;
   amountInput.value = exp.amount;
-  setCategory(exp.category);
+  if (!exp.credit) setCategory(exp.category);
   dateInput.value = new Date(exp.date - new Date(exp.date).getTimezoneOffset() * 60000)
     .toISOString().slice(0, 10);
-  formTitle.textContent = "Edit expense";
+  formTitle.textContent = exp.credit ? "Edit income" : "Edit expense";
   submitBtn.textContent = "Save changes";
   cancelEditBtn.hidden = false;
   form.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -184,7 +201,7 @@ function enterEditMode(id) {
 
 function exitEditMode() {
   editIdInput.value = "";
-  formTitle.textContent = "Add an expense";
+  setIncomeMode(false);
   submitBtn.textContent = "+ Add";
   cancelEditBtn.hidden = true;
   form.reset();
