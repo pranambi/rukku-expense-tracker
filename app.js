@@ -15,6 +15,7 @@ const CATEGORY_EMOJI = {
   Health: "💊",
   Remittance: "🏡",
   Investment: "📈",
+  "Self Improvement": "📚",
   Other: "📦",
 };
 
@@ -80,6 +81,7 @@ const CATEGORY_COLOR = {
   Health: "#ec4899",
   Remittance: "#f59e0b",
   Investment: "#06b6d4",
+  "Self Improvement": "#84cc16",
   Other: "#94a3b8",
 };
 
@@ -392,6 +394,7 @@ const BANK_CATEGORY_RULES = [
   [/pharmacy|hospital|clinic|medical|health|doctor/i, "Health"],
   [/careem pay|remit|exchange|western union|moneygram|money transfer|send.*home/i, "Remittance"],
   [/broker|invest|trading|\bstock\b|mutual fund|securities|portfolio/i, "Investment"],
+  [/\bgym\b|fitness|yoga|pilates|\bbook\b|udemy|coursera|duolingo|skillshare|training|workshop|seminar|library/i, "Self Improvement"],
 ];
 
 function guessCategoryFromDesc(desc) {
@@ -466,11 +469,12 @@ function refreshMonthFilter() {
   if (months.includes(current)) filterMonth.value = current;
 }
 
-function renderDonut(byCategory, total) {
-  const entries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
+const hiddenCategories = new Set();
 
-  // Empty state
-  if (total <= 0 || entries.length === 0) {
+function renderDonut(byCategory, total) {
+  const allEntries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
+
+  if (total <= 0 || allEntries.length === 0) {
     donutWrap.hidden = true;
     breakdownEmptyEl.hidden = false;
     donutEl.style.background = "var(--panel-2)";
@@ -480,27 +484,40 @@ function renderDonut(byCategory, total) {
   donutWrap.hidden = false;
   breakdownEmptyEl.hidden = true;
 
-  // Build the conic-gradient: each category is a slice sized by its share.
-  let acc = 0;
-  const segments = entries.map(([cat, amt]) => {
-    const start = (acc / total) * 360;
-    acc += amt;
-    const end = (acc / total) * 360;
-    return `${CATEGORY_COLOR[cat]} ${start}deg ${end}deg`;
-  });
-  donutEl.style.background = `conic-gradient(${segments.join(", ")})`;
-  donutTotalEl.textContent = money(total);
+  const visibleEntries = allEntries.filter(([cat]) => !hiddenCategories.has(cat));
+  const visibleTotal = visibleEntries.reduce((s, [, a]) => s + a, 0);
 
-  // Legend
+  if (visibleTotal > 0) {
+    let acc = 0;
+    const segments = visibleEntries.map(([cat, amt]) => {
+      const start = (acc / visibleTotal) * 360;
+      acc += amt;
+      const end = (acc / visibleTotal) * 360;
+      return `${CATEGORY_COLOR[cat]} ${start}deg ${end}deg`;
+    });
+    donutEl.style.background = `conic-gradient(${segments.join(", ")})`;
+    donutTotalEl.textContent = money(visibleTotal);
+  } else {
+    donutEl.style.background = "var(--panel-2)";
+    donutTotalEl.textContent = money(0);
+  }
+
   legendEl.innerHTML = "";
-  for (const [cat, amt] of entries) {
+  for (const [cat, amt] of allEntries) {
+    const isHidden = hiddenCategories.has(cat);
     const pct = (amt / total) * 100;
     const row = document.createElement("div");
-    row.className = "legend-row";
+    row.className = "legend-row" + (isHidden ? " legend-hidden" : "");
     row.innerHTML = `
-      <span class="legend-dot" style="background:${CATEGORY_COLOR[cat]}"></span>
+      <span class="legend-dot" style="background:${isHidden ? "var(--muted)" : CATEGORY_COLOR[cat]}"></span>
       <span class="legend-name">${CATEGORY_EMOJI[cat]} ${cat}</span>
       <span class="legend-val">${money(amt)} · ${pct.toFixed(0)}%</span>`;
+    row.addEventListener("click", () => {
+      if (hiddenCategories.has(cat)) hiddenCategories.delete(cat);
+      else hiddenCategories.add(cat);
+      const { byCategory: bc, total: t } = getStats();
+      renderDonut(bc, t);
+    });
     legendEl.appendChild(row);
   }
 }

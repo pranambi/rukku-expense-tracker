@@ -250,8 +250,11 @@ button[type="submit"]:active { transform: scale(.97); }
 .donut-center span { color: var(--muted); font-size: .75rem; }
 
 .legend { display: flex; flex-direction: column; gap: 8px; min-width: 150px; }
-.legend-row { display: flex; align-items: center; gap: 8px; font-size: .88rem; }
-.legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+.legend-row { display: flex; align-items: center; gap: 8px; font-size: .88rem; cursor: pointer; border-radius: 6px; padding: 3px 4px; transition: opacity .15s, background .15s; }
+.legend-row:hover { background: #ffffff0d; }
+.legend-row.legend-hidden { opacity: 0.35; }
+.legend-row.legend-hidden .legend-name { text-decoration: line-through; }
+.legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; transition: background .15s; }
 .legend-name { flex: 1; }
 .legend-val { color: var(--muted); }
 
