@@ -343,8 +343,18 @@ importFile.addEventListener("change", (e) => {
 // Minimal CSV parser that handles quoted fields and commas inside quotes.
 function parseCSV(text) {
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) return 0;
+  const headers = splitCSVLine(lines[0]);
+  // Detect bank statement format: Date, Details, Amount, Currency, Balance, Debit/Credit, Status
+  if (headers.length >= 6 &&
+      headers[0].toLowerCase().includes("date") &&
+      headers[1].toLowerCase().includes("details") &&
+      headers[5].toLowerCase().replace(/[^a-z]/g, "").includes("debit")) {
+    return parseBankCSV(lines);
+  }
+  // Original app export format: Description, Amount, Category, Date
   let added = 0;
-  for (let i = 1; i < lines.length; i++) { // skip header row
+  for (let i = 1; i < lines.length; i++) {
     const cols = splitCSVLine(lines[i]);
     if (cols.length < 3) continue;
     const desc = (cols[0] || "").trim();
@@ -352,6 +362,41 @@ function parseCSV(text) {
     const category = CATEGORY_EMOJI[cols[2]] ? cols[2].trim() : "Other";
     const date = cols[3] ? new Date(cols[3]).getTime() : Date.now();
     if (!desc || isNaN(amount) || amount <= 0) continue;
+    expenses.unshift({ id: Date.now() + i, desc, amount, category, date: isNaN(date) ? Date.now() : date });
+    added++;
+  }
+  return added;
+}
+
+const BANK_CATEGORY_RULES = [
+  [/\btaxi\b|\buber\b|\bmetro\b|\bbus\b|transport|airline|flight|careem.*cab|cab\b/i, "Transport"],
+  [/restaurant|cafeteria|catering|sweets|bakery|\bfood\b|burger|pizza|\bcafe\b|coffee|diner|corn\b/i, "Food"],
+  [/supermarket|hypermarket|\bmarket\b|\bmall\b|\bstore\b|\bshop\b/i, "Shopping"],
+  [/electricity|water\b|telecom|internet|\bmobile\b|dewa|etisalat|\bdu\b|e&|digital app/i, "Bills"],
+  [/netflix|spotify|youtube|instagram|google\*/i, "Fun"],
+  [/pharmacy|hospital|clinic|medical|health|doctor/i, "Health"],
+];
+
+function guessCategoryFromDesc(desc) {
+  for (const [pattern, cat] of BANK_CATEGORY_RULES) {
+    if (pattern.test(desc)) return cat;
+  }
+  return "Other";
+}
+
+function parseBankCSV(lines) {
+  let added = 0;
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSVLine(lines[i]);
+    if (cols.length < 6) continue;
+    const debitCredit = cols[5].trim().toLowerCase();
+    if (debitCredit === "credit") continue; // skip income/salary rows
+    const dateStr = cols[0].trim();
+    const desc = cols[1].trim();
+    const amount = parseFloat(cols[2].replace(/,/g, ""));
+    const date = new Date(dateStr).getTime();
+    if (!desc || isNaN(amount) || amount <= 0) continue;
+    const category = guessCategoryFromDesc(desc);
     expenses.unshift({ id: Date.now() + i, desc, amount, category, date: isNaN(date) ? Date.now() : date });
     added++;
   }
