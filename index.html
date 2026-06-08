@@ -6,7 +6,7 @@
   <meta name="description" content="A simple, private expense tracker that runs in your browser." />
   <title>💰 Rukku's Expense Tracker</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=1780918283" />
+  <link rel="stylesheet" href="style.css?v=1780918560" />
 </head>
 <body>
   <div class="app">
@@ -51,6 +51,8 @@
           <button type="button" class="chip" data-category="Bills">🧾 Bills</button>
           <button type="button" class="chip" data-category="Fun">🎮 Fun</button>
           <button type="button" class="chip" data-category="Health">💊 Health</button>
+          <button type="button" class="chip" data-category="Remittance">🏡 Remittance</button>
+          <button type="button" class="chip" data-category="Investment">📈 Investment</button>
           <button type="button" class="chip" data-category="Other">📦 Other</button>
         </div>
         <input type="hidden" id="categoryInput" value="Food" />
@@ -118,6 +120,8 @@
           <option value="Bills">🧾 Bills</option>
           <option value="Fun">🎮 Fun</option>
           <option value="Health">💊 Health</option>
+          <option value="Remittance">🏡 Remittance</option>
+          <option value="Investment">📈 Investment</option>
           <option value="Other">📦 Other</option>
         </select>
         <select id="filterMonth">
@@ -163,6 +167,6 @@
   <!-- Toast container -->
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
 
-  <script src="app.js?v=1780918283"></script>
+  <script src="app.js?v=1780918560"></script>
 </body>
 </html>

@@ -13,6 +13,8 @@ const CATEGORY_EMOJI = {
   Bills: "🧾",
   Fun: "🎮",
   Health: "💊",
+  Remittance: "🏡",
+  Investment: "📈",
   Other: "📦",
 };
 
@@ -76,6 +78,8 @@ const CATEGORY_COLOR = {
   Bills: "#f43f5e",
   Fun: "#22c55e",
   Health: "#ec4899",
+  Remittance: "#f59e0b",
+  Investment: "#06b6d4",
   Other: "#94a3b8",
 };
 
@@ -386,6 +390,8 @@ const BANK_CATEGORY_RULES = [
   [/electricity|water\b|telecom|internet|\bmobile\b|dewa|etisalat|\bdu\b|e&|digital app/i, "Bills"],
   [/netflix|spotify|youtube|instagram|google\*/i, "Fun"],
   [/pharmacy|hospital|clinic|medical|health|doctor/i, "Health"],
+  [/careem pay|remit|exchange|western union|moneygram|money transfer|send.*home/i, "Remittance"],
+  [/broker|invest|trading|\bstock\b|mutual fund|securities|portfolio/i, "Investment"],
 ];
 
 function guessCategoryFromDesc(desc) {
