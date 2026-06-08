@@ -6,7 +6,7 @@
   <meta name="description" content="A simple, private expense tracker that runs in your browser." />
   <title>💰 Rukku's Expense Tracker</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=1780917838" />
+  <link rel="stylesheet" href="style.css?v=1780918283" />
 </head>
 <body>
   <div class="app">
@@ -20,6 +20,10 @@
       <div class="card total">
         <span class="card-label">Total spent</span>
         <span class="card-value" id="totalSpent">₹0.00</span>
+      </div>
+      <div class="card income">
+        <span class="card-label">Total income</span>
+        <span class="card-value" id="totalIncome">₹0.00</span>
       </div>
       <div class="card count">
         <span class="card-label">Expenses</span>
@@ -129,6 +133,7 @@
             <option value="€">€ EUR</option>
             <option value="£">£ GBP</option>
             <option value="¥">¥ JPY</option>
+            <option value="AED ">AED</option>
           </select>
         </label>
         <div class="data-buttons">
@@ -158,6 +163,6 @@
   <!-- Toast container -->
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
 
-  <script src="app.js?v=1780917838"></script>
+  <script src="app.js?v=1780918283"></script>
 </body>
 </html>

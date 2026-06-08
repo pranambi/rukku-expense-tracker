@@ -31,6 +31,7 @@ const submitBtn = $("submitBtn");
 const cancelEditBtn = $("cancelEditBtn");
 
 const totalSpentEl = $("totalSpent");
+const totalIncomeEl = $("totalIncome");
 const expenseCountEl = $("expenseCount");
 const topCategoryEl = $("topCategory");
 
@@ -224,7 +225,7 @@ budgetInput.addEventListener("input", () => {
 function renderBudget() {
   budgetSymbol.textContent = settings.currency;
   const spentThisMonth = expenses
-    .filter((e) => monthKey(e.date) === monthKey(Date.now()))
+    .filter((e) => !e.credit && monthKey(e.date) === monthKey(Date.now()))
     .reduce((s, e) => s + e.amount, 0);
 
   // No budget set → friendly prompt, hide the figures
@@ -303,7 +304,7 @@ function getFiltered() {
 }
 
 // ============ CSV Export / Import ============
-const CURRENCY_CODES = { "₹": "INR", "$": "USD", "€": "EUR", "£": "GBP", "¥": "JPY" };
+const CURRENCY_CODES = { "₹": "INR", "$": "USD", "€": "EUR", "£": "GBP", "¥": "JPY", "AED ": "AED" };
 
 function bankDateStr(ts) {
   return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
@@ -317,7 +318,7 @@ exportBtn.addEventListener("click", () => {
   const currCode = CURRENCY_CODES[settings.currency] || settings.currency;
   const rows = [["Date", "Details", "Amount", "Currency", "Balance", "Debit/Credit", "Status"]];
   for (const e of expenses) {
-    rows.push([bankDateStr(e.date), e.desc, bankAmountStr(e.amount), currCode, "", "Debit", "SETTLED"]);
+    rows.push([bankDateStr(e.date), e.desc, bankAmountStr(e.amount), currCode, "", e.credit ? "Credit" : "Debit", "SETTLED"]);
   }
   const csv = rows
     .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
@@ -400,14 +401,16 @@ function parseBankCSV(lines) {
     const cols = splitCSVLine(lines[i]);
     if (cols.length < 6) continue;
     const debitCredit = cols[5].trim().toLowerCase();
-    if (debitCredit === "credit") continue; // skip income/salary rows
+    const isCredit = debitCredit === "credit";
     const dateStr = cols[0].trim();
     const desc = cols[1].trim();
     const amount = parseFloat(cols[2].replace(/,/g, ""));
     const date = new Date(dateStr).getTime();
     if (!desc || isNaN(amount) || amount <= 0) continue;
-    const category = guessCategoryFromDesc(desc);
-    expenses.unshift({ id: Date.now() + i, desc, amount, category, date: isNaN(date) ? Date.now() : date });
+    const category = isCredit ? "Other" : guessCategoryFromDesc(desc);
+    const entry = { id: Date.now() + i, desc, amount, category, date: isNaN(date) ? Date.now() : date };
+    if (isCredit) entry.credit = true;
+    expenses.unshift(entry);
     added++;
   }
   return added;
@@ -433,12 +436,14 @@ function splitCSVLine(line) {
 
 // ============ Stats ============
 function getStats() {
-  const total = expenses.reduce((s, e) => s + e.amount, 0);
+  const debits = expenses.filter((e) => !e.credit);
+  const total = debits.reduce((s, e) => s + e.amount, 0);
+  const totalIncome = expenses.filter((e) => e.credit).reduce((s, e) => s + e.amount, 0);
   const byCategory = {};
-  for (const e of expenses) byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
+  for (const e of debits) byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
   let topCategory = null, topAmount = 0;
   for (const [c, a] of Object.entries(byCategory)) if (a > topAmount) { topAmount = a; topCategory = c; }
-  return { total, byCategory, topCategory };
+  return { total, totalIncome, byCategory, topCategory };
 }
 
 // ============ Rendering ============
@@ -495,10 +500,11 @@ function renderDonut(byCategory, total) {
 }
 
 function render() {
-  const { total, byCategory, topCategory } = getStats();
+  const { total, totalIncome, byCategory, topCategory } = getStats();
 
   totalSpentEl.textContent = money(total);
-  expenseCountEl.textContent = expenses.length;
+  totalIncomeEl.textContent = money(totalIncome);
+  expenseCountEl.textContent = expenses.filter((e) => !e.credit).length;
   topCategoryEl.textContent = topCategory ? `${CATEGORY_EMOJI[topCategory]} ${topCategory}` : "—";
 
   renderDonut(byCategory, total);
@@ -521,14 +527,15 @@ function renderList() {
   listEl.innerHTML = "";
   for (const exp of filtered) {
     const li = document.createElement("li");
-    li.className = "expense";
+    const isCredit = !!exp.credit;
+    li.className = "expense" + (isCredit ? " credit-row" : "");
     li.innerHTML = `
-      <span class="exp-emoji">${CATEGORY_EMOJI[exp.category]}</span>
+      <span class="exp-emoji">${isCredit ? "💰" : CATEGORY_EMOJI[exp.category]}</span>
       <div class="exp-main">
         <div class="exp-desc"></div>
-        <div class="exp-meta">${exp.category} · ${formatDate(exp.date)}</div>
+        <div class="exp-meta">${isCredit ? "Income" : exp.category} · ${formatDate(exp.date)}</div>
       </div>
-      <span class="exp-amount">${money(exp.amount)}</span>
+      <span class="exp-amount">${isCredit ? "+" : ""}${money(exp.amount)}</span>
       <div class="row-actions">
         <button class="icon-btn edit-btn" title="Edit">✏️</button>
         <button class="icon-btn del-btn" title="Delete">✕</button>
