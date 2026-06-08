@@ -82,7 +82,7 @@ header h1 { font-size: 2rem; }
 /* Summary cards */
 .summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-bottom: 20px;
 }
@@ -101,6 +101,8 @@ header h1 { font-size: 2rem; }
 .card-value { font-size: 1.4rem; font-weight: 700; }
 .card.total .card-value { color: var(--accent); }
 .card.income .card-value { color: #22c55e; }
+.card.balance .card-value { color: #22c55e; }
+.card.balance .card-value.negative { color: var(--danger); }
 .card.top .card-value { font-size: 1.05rem; }
 li.expense.credit-row .exp-amount { color: #22c55e; }
 li.expense.credit-row .exp-emoji { background: #22c55e18; }

@@ -35,6 +35,7 @@ const cancelEditBtn = $("cancelEditBtn");
 
 const totalSpentEl = $("totalSpent");
 const totalIncomeEl = $("totalIncome");
+const totalBalanceEl = $("totalBalance");
 const expenseCountEl = $("expenseCount");
 const topCategoryEl = $("topCategory");
 
@@ -541,17 +542,21 @@ function renderDonut(byCategory, total) {
 function renderSummaryCards(byCategory) {
   const visibleEntries = Object.entries(byCategory).filter(([cat]) => !hiddenCategories.has(cat));
   const visibleTotal = visibleEntries.reduce((s, [, a]) => s + a, 0);
+  const totalIncome = expenses.filter((e) => e.credit && monthKey(e.date) === activeMonth).reduce((s, e) => s + e.amount, 0);
+  const balance = totalIncome - visibleTotal;
   let topCat = null, topAmt = 0;
   for (const [c, a] of visibleEntries) if (a > topAmt) { topAmt = a; topCat = c; }
   totalSpentEl.textContent = money(visibleTotal);
-  expenseCountEl.textContent = expenses.filter((e) => !e.credit && !hiddenCategories.has(e.category)).length;
+  totalIncomeEl.textContent = money(totalIncome);
+  totalBalanceEl.textContent = money(Math.abs(balance));
+  totalBalanceEl.classList.toggle("negative", balance < 0);
+  expenseCountEl.textContent = expenses.filter((e) => !e.credit && !hiddenCategories.has(e.category) && monthKey(e.date) === activeMonth).length;
   topCategoryEl.textContent = topCat ? `${CATEGORY_EMOJI[topCat]} ${topCat}` : "—";
 }
 
 function render() {
-  const { totalIncome, byCategory } = getStats();
+  const { byCategory } = getStats();
 
-  totalIncomeEl.textContent = money(totalIncome);
   renderSummaryCards(byCategory);
 
   renderDonut(byCategory, Object.values(byCategory).reduce((s, a) => s + a, 0));
