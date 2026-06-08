@@ -420,13 +420,15 @@ function parseBankCSV(lines) {
     const dateStr = cols[0].trim();
     const desc = cols[1].trim();
     const currency = (cols[3] || "").trim().toUpperCase();
-    let amount = parseFloat(cols[2].replace(/,/g, ""));
-    if (currency !== "AED" && FX_TO_AED[currency]) amount = amount * FX_TO_AED[currency];
+    const rawAmount = parseFloat(cols[2].replace(/,/g, ""));
+    const fxRate = currency !== "AED" ? FX_TO_AED[currency] : null;
+    let amount = fxRate ? rawAmount * fxRate : rawAmount;
     const date = new Date(dateStr).getTime();
     if (!desc || isNaN(amount) || amount <= 0) continue;
     const category = isCredit ? "Other" : guessCategoryFromDesc(desc);
     const entry = { id: Date.now() + i, desc, amount, category, date: isNaN(date) ? Date.now() : date };
     if (isCredit) entry.credit = true;
+    if (fxRate) { entry.origAmount = rawAmount; entry.origCurrency = currency; entry.fxRate = fxRate; }
     expenses.unshift(entry);
     added++;
   }
@@ -576,11 +578,15 @@ function renderList() {
     const li = document.createElement("li");
     const isCredit = !!exp.credit;
     li.className = "expense" + (isCredit ? " credit-row" : "");
+    const fxNote = exp.origCurrency
+      ? `<div class="exp-fx">${exp.origAmount.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${exp.origCurrency} @ ${exp.fxRate}</div>`
+      : "";
     li.innerHTML = `
       <span class="exp-emoji">${isCredit ? "💰" : CATEGORY_EMOJI[exp.category]}</span>
       <div class="exp-main">
         <div class="exp-desc"></div>
         <div class="exp-meta">${isCredit ? "Income" : exp.category} · ${formatDate(exp.date)}</div>
+        ${fxNote}
       </div>
       <span class="exp-amount">${isCredit ? "+" : ""}${money(exp.amount)}</span>
       <div class="row-actions">

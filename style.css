@@ -282,6 +282,7 @@ li.expense.removing { animation: slideOut .2s ease forwards; }
 .exp-main { flex: 1; min-width: 0; }
 .exp-desc { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .exp-meta { color: var(--muted); font-size: .8rem; }
+.exp-fx { color: var(--muted); font-size: .72rem; font-style: italic; margin-top: 1px; }
 .exp-amount { font-weight: 700; color: var(--accent); white-space: nowrap; }
 .row-actions { display: flex; gap: 2px; }
 .icon-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 8px; }
