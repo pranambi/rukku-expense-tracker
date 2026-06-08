@@ -505,13 +505,13 @@ function renderDonut(byCategory, total) {
   legendEl.innerHTML = "";
   for (const [cat, amt] of allEntries) {
     const isHidden = hiddenCategories.has(cat);
-    const pct = (amt / total) * 100;
+    const pct = isHidden ? null : (visibleTotal > 0 ? (amt / visibleTotal) * 100 : 0);
     const row = document.createElement("div");
     row.className = "legend-row" + (isHidden ? " legend-hidden" : "");
     row.innerHTML = `
       <span class="legend-dot" style="background:${isHidden ? "var(--muted)" : CATEGORY_COLOR[cat]}"></span>
       <span class="legend-name">${CATEGORY_EMOJI[cat]} ${cat}</span>
-      <span class="legend-val">${money(amt)} · ${pct.toFixed(0)}%</span>`;
+      <span class="legend-val">${money(amt)}${isHidden ? "" : ` · ${pct.toFixed(0)}%`}</span>`;
     row.addEventListener("click", () => {
       if (hiddenCategories.has(cat)) hiddenCategories.delete(cat);
       else hiddenCategories.add(cat);
