@@ -303,11 +303,21 @@ function getFiltered() {
 }
 
 // ============ CSV Export / Import ============
+const CURRENCY_CODES = { "₹": "INR", "$": "USD", "€": "EUR", "£": "GBP", "¥": "JPY" };
+
+function bankDateStr(ts) {
+  return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+}
+function bankAmountStr(n) {
+  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 exportBtn.addEventListener("click", () => {
   if (!expenses.length) return toast("Nothing to export yet");
-  const rows = [["Description", "Amount", "Category", "Date"]];
+  const currCode = CURRENCY_CODES[settings.currency] || settings.currency;
+  const rows = [["Date", "Details", "Amount", "Currency", "Balance", "Debit/Credit", "Status"]];
   for (const e of expenses) {
-    rows.push([e.desc, e.amount, e.category, new Date(e.date).toISOString()]);
+    rows.push([bankDateStr(e.date), e.desc, bankAmountStr(e.amount), currCode, "", "Debit", "SETTLED"]);
   }
   const csv = rows
     .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
