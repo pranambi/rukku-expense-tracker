@@ -305,6 +305,7 @@ function getFiltered() {
   const cat = filterCategory.value;
   return expenses.filter((e) => {
     if (monthKey(e.date) !== activeMonth) return false;
+    if (!e.credit && hiddenCategories.has(e.category)) return false;
     if (q && !e.desc.toLowerCase().includes(q)) return false;
     if (cat && e.category !== cat) return false;
     return true;
@@ -524,6 +525,7 @@ function renderDonut(byCategory, total) {
       const { byCategory: bc, total: t } = getStats();
       renderDonut(bc, t);
       renderSummaryCards(bc);
+      renderList();
     });
     legendEl.appendChild(row);
   }
