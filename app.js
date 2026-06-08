@@ -407,6 +407,9 @@ function guessCategoryFromDesc(desc) {
   return "Other";
 }
 
+// Fixed AED peg rate + common currencies for future statements
+const FX_TO_AED = { USD: 3.6725, EUR: 4.02, GBP: 4.68, INR: 0.044 };
+
 function parseBankCSV(lines) {
   let added = 0;
   for (let i = 1; i < lines.length; i++) {
@@ -416,7 +419,9 @@ function parseBankCSV(lines) {
     const isCredit = debitCredit === "credit";
     const dateStr = cols[0].trim();
     const desc = cols[1].trim();
-    const amount = parseFloat(cols[2].replace(/,/g, ""));
+    const currency = (cols[3] || "").trim().toUpperCase();
+    let amount = parseFloat(cols[2].replace(/,/g, ""));
+    if (currency !== "AED" && FX_TO_AED[currency]) amount = amount * FX_TO_AED[currency];
     const date = new Date(dateStr).getTime();
     if (!desc || isNaN(amount) || amount <= 0) continue;
     const category = isCredit ? "Other" : guessCategoryFromDesc(desc);
