@@ -6,7 +6,7 @@
   <meta name="description" content="A simple, private expense tracker that runs in your browser." />
   <title>💰 Rukku's Expense Tracker</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=1780919458" />
+  <link rel="stylesheet" href="style.css?v=1780920099" />
 </head>
 <body>
   <div class="app">
@@ -14,6 +14,13 @@
       <h1>💰 Rukku's Expense Tracker</h1>
       <p class="subtitle">Track where your money goes — private & saved on your device</p>
     </header>
+
+    <!-- Month navigation -->
+    <div class="month-nav">
+      <button id="prevMonthBtn" class="month-nav-btn">&#8249;</button>
+      <span id="activeMonthLabel">—</span>
+      <button id="nextMonthBtn" class="month-nav-btn">&#8250;</button>
+    </div>
 
     <!-- Summary cards -->
     <section class="summary">
@@ -126,9 +133,6 @@
           <option value="Self Improvement">📚 Self Improvement</option>
           <option value="Other">📦 Other</option>
         </select>
-        <select id="filterMonth">
-          <option value="">All months</option>
-        </select>
       </div>
       <div class="controls-row secondary">
         <label class="currency-pick">
@@ -169,6 +173,6 @@
   <!-- Toast container -->
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
 
-  <script src="app.js?v=1780919458"></script>
+  <script src="app.js?v=1780920099"></script>
 </body>
 </html>

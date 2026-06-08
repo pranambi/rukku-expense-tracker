@@ -51,8 +51,10 @@ const budgetHint = $("budgetHint");
 
 const searchInput = $("searchInput");
 const filterCategory = $("filterCategory");
-const filterMonth = $("filterMonth");
 const currencySelect = $("currencySelect");
+const prevMonthBtn = $("prevMonthBtn");
+const nextMonthBtn = $("nextMonthBtn");
+const activeMonthLabel = $("activeMonthLabel");
 
 const exportBtn = $("exportBtn");
 const importBtn = $("importBtn");
@@ -90,6 +92,7 @@ const toastHost = $("toastHost");
 // --- State ---
 let expenses = load(STORAGE_KEY, []);
 let settings = load(SETTINGS_KEY, { currency: "₹", budget: 0 });
+let activeMonth = monthKey(Date.now());
 
 // --- Storage helpers ---
 function load(key, fallback) {
@@ -231,7 +234,7 @@ budgetInput.addEventListener("input", () => {
 function renderBudget() {
   budgetSymbol.textContent = settings.currency;
   const spentThisMonth = expenses
-    .filter((e) => !e.credit && monthKey(e.date) === monthKey(Date.now()))
+    .filter((e) => !e.credit && monthKey(e.date) === activeMonth)
     .reduce((s, e) => s + e.amount, 0);
 
   // No budget set → friendly prompt, hide the figures
@@ -293,18 +296,17 @@ currencySelect.addEventListener("change", () => {
 });
 
 // ============ Filters ============
-[searchInput, filterCategory, filterMonth].forEach((el) =>
+[searchInput, filterCategory].forEach((el) =>
   el.addEventListener("input", renderList)
 );
 
 function getFiltered() {
   const q = searchInput.value.trim().toLowerCase();
   const cat = filterCategory.value;
-  const month = filterMonth.value;
   return expenses.filter((e) => {
+    if (monthKey(e.date) !== activeMonth) return false;
     if (q && !e.desc.toLowerCase().includes(q)) return false;
     if (cat && e.category !== cat) return false;
-    if (month && monthKey(e.date) !== month) return false;
     return true;
   });
 }
@@ -445,9 +447,9 @@ function splitCSVLine(line) {
 
 // ============ Stats ============
 function getStats() {
-  const debits = expenses.filter((e) => !e.credit);
+  const debits = expenses.filter((e) => !e.credit && monthKey(e.date) === activeMonth);
   const total = debits.reduce((s, e) => s + e.amount, 0);
-  const totalIncome = expenses.filter((e) => e.credit).reduce((s, e) => s + e.amount, 0);
+  const totalIncome = expenses.filter((e) => e.credit && monthKey(e.date) === activeMonth).reduce((s, e) => s + e.amount, 0);
   const byCategory = {};
   for (const e of debits) byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
   let topCategory = null, topAmount = 0;
@@ -455,19 +457,23 @@ function getStats() {
   return { total, totalIncome, byCategory, topCategory };
 }
 
-// ============ Rendering ============
-function refreshMonthFilter() {
-  const months = [...new Set(expenses.map((e) => monthKey(e.date)))].sort().reverse();
-  const current = filterMonth.value;
-  filterMonth.innerHTML = '<option value="">All months</option>';
-  for (const m of months) {
-    const opt = document.createElement("option");
-    opt.value = m;
-    opt.textContent = monthLabel(m);
-    filterMonth.appendChild(opt);
-  }
-  if (months.includes(current)) filterMonth.value = current;
+// ============ Month navigation ============
+function renderMonthNav() {
+  activeMonthLabel.textContent = monthLabel(activeMonth);
+  nextMonthBtn.disabled = activeMonth >= monthKey(Date.now());
 }
+
+function shiftMonth(delta) {
+  const [y, m] = activeMonth.split("-").map(Number);
+  activeMonth = monthKey(new Date(y, m - 1 + delta).getTime());
+  hiddenCategories.clear();
+  render();
+}
+
+prevMonthBtn.addEventListener("click", () => shiftMonth(-1));
+nextMonthBtn.addEventListener("click", () => shiftMonth(+1));
+
+// ============ Rendering ============
 
 const hiddenCategories = new Set();
 
@@ -541,20 +547,22 @@ function render() {
 
   renderDonut(byCategory, Object.values(byCategory).reduce((s, a) => s + a, 0));
 
-  refreshMonthFilter();
+  renderMonthNav();
   renderBudget();
   renderList();
 }
 
 function renderList() {
   const filtered = getFiltered();
-  const hasAny = expenses.length > 0;
+  const monthExpenses = expenses.filter((e) => monthKey(e.date) === activeMonth);
+  const hasAny = monthExpenses.length > 0;
   const hasShown = filtered.length > 0;
 
-  clearAllBtn.hidden = !hasAny;
+  clearAllBtn.hidden = !expenses.length;
   emptyStateEl.hidden = hasAny;
+  emptyStateEl.textContent = `No expenses for ${monthLabel(activeMonth)} yet. Add one above! 👆`;
   noMatchStateEl.hidden = !(hasAny && !hasShown);
-  shownCountEl.textContent = hasAny ? `(${filtered.length}${filtered.length !== expenses.length ? " of " + expenses.length : ""})` : "";
+  shownCountEl.textContent = hasAny ? `(${filtered.length}${filtered.length !== monthExpenses.length ? " of " + monthExpenses.length : ""})` : "";
 
   listEl.innerHTML = "";
   for (const exp of filtered) {
