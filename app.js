@@ -69,6 +69,7 @@ const emptyStateEl = $("emptyState");
 const noMatchStateEl = $("noMatchState");
 const shownCountEl = $("shownCount");
 const clearAllBtn = $("clearAllBtn");
+const clearMonthBtn = $("clearMonthBtn");
 
 const breakdownSection = $("breakdownSection");
 const donutWrap = $("donutWrap");
@@ -358,9 +359,24 @@ function deleteExpense(id) {
   });
 }
 
+clearMonthBtn.addEventListener("click", () => {
+  const monthExpenses = expenses.filter(e => monthKey(e.date) === activeMonth);
+  if (!monthExpenses.length) return;
+  if (confirm(`Delete all expenses for ${monthLabel(activeMonth)}? This cannot be undone.`)) {
+    const backup = expenses.slice();
+    expenses = expenses.filter(e => monthKey(e.date) !== activeMonth);
+    saveExpenses();
+    render();
+    toast(`🗑️ ${monthLabel(activeMonth)} cleared`, {
+      actionLabel: "Undo",
+      onAction: () => { expenses = backup; saveExpenses(); render(); toast("↩️ Restored"); },
+    });
+  }
+});
+
 clearAllBtn.addEventListener("click", () => {
   if (!expenses.length) return;
-  if (confirm("Delete ALL expenses? This cannot be undone.")) {
+  if (confirm("Delete ALL expenses across every month? This cannot be undone.")) {
     const backup = expenses.slice();
     expenses = [];
     saveExpenses();
@@ -720,6 +736,7 @@ function renderList() {
   const hasAny = monthExpenses.length > 0;
   const hasShown = filtered.length > 0;
 
+  clearMonthBtn.hidden = !monthExpenses.length;
   clearAllBtn.hidden = !expenses.length;
   emptyStateEl.hidden = hasAny;
   emptyStateEl.textContent = `No expenses for ${monthLabel(activeMonth)} yet. Add one above! 👆`;

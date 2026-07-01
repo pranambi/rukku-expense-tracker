@@ -6,7 +6,7 @@
   <meta name="description" content="A simple, private expense tracker that runs in your browser." />
   <title>Rukku's Expense Tracker</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=1782928457" />
+  <link rel="stylesheet" href="style.css?v=1782928696" />
 </head>
 <body>
   <div class="app">
@@ -173,6 +173,7 @@
     <section class="list-panel">
       <div class="list-header">
         <h2>Expenses <span class="muted-count" id="shownCount"></span></h2>
+        <button id="clearMonthBtn" class="link-btn" hidden>Clear this month</button>
         <button id="clearAllBtn" class="link-btn" hidden>Clear all</button>
       </div>
       <ul id="expenseList"></ul>
@@ -190,6 +191,6 @@
   <!-- Emoji grid lives here as direct body child so position:fixed works correctly -->
   <div id="emojiGrid" class="emoji-grid"></div>
 
-  <script src="app.js?v=1782928457"></script>
+  <script src="app.js?v=1782928696"></script>
 </body>
 </html>
