@@ -216,29 +216,53 @@ input:focus, select:focus { border-color: var(--accent); }
 /* new-cat form: hidden by default, shown via .open class */
 .new-cat-form { display: none; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
 .new-cat-form.open { display: flex; }
-.new-cat-emoji-input {
-  width: 58px;
-  text-align: center;
-  font-size: 1.3rem;
-  padding: 10px 6px;
-  flex: 0 0 auto;
+
+.new-cat-emoji-btn {
+  width: 52px; height: 52px;
+  font-size: 1.35rem;
+  border-radius: 10px;
+  border: 2px solid var(--accent);
+  background: var(--panel-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  padding: 0; flex-shrink: 0;
 }
+.new-cat-emoji-btn:hover { border-color: var(--accent-2); }
+
+/* Emoji grid — fixed so it stays put while scrolling, has own scroll */
+.emoji-grid {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  background: var(--panel);
+  border: 1px solid #ffffff28;
+  border-radius: 12px;
+  padding: 8px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+  box-shadow: 0 8px 32px #000000b0;
+  width: 310px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.emoji-grid.open { display: grid; }
+.emoji-cell {
+  width: 26px; height: 26px;
+  font-size: 1.2rem;
+  display: grid; place-items: center;
+  border-radius: 6px;
+  cursor: pointer; line-height: 1;
+}
+.emoji-cell:hover { background: #ffffff18; }
 
 /* delete button on custom chips */
 .chip-custom { display: inline-flex; align-items: center; gap: 5px; }
 .chip-del {
-  font-size: .7rem;
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  border-radius: 50%;
-  width: 14px;
-  height: 14px;
-  display: grid;
-  place-items: center;
+  font-size: .7rem; background: none; border: none;
+  color: var(--muted); cursor: pointer; padding: 0;
+  line-height: 1; border-radius: 50%;
+  width: 14px; height: 14px;
+  display: grid; place-items: center;
 }
 .chip-del:hover { color: var(--danger); }
 .new-cat-name {
