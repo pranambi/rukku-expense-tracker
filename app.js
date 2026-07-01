@@ -539,9 +539,9 @@ function parseCSV(text) {
 
 const BANK_CATEGORY_RULES = [
   [/\btaxi\b|\buber\b|\bmetro\b|\bbus\b|transport|airline|flight|careem.*cab|cab\b/i, "Transport"],
-  [/restaurant|cafeteria|catering|sweets|bakery|\bfood\b|burger|pizza|\bcafe\b|coffee|diner|corn\b/i, "Food"],
-  [/supermarket|hypermarket|\bmarket\b|\bmall\b|\bstore\b|\bshop\b/i, "Shopping"],
-  [/electricity|water\b|telecom|internet|\bmobile\b|dewa|etisalat|\bdu\b|e&|digital app/i, "Bills"],
+  [/restaurant|cafeteria|catering|sweets|bakery|\bfood\b|burger|pizza|\bcafe\b|coffee|diner|corn\b|talabat/i, "Food"],
+  [/supermarket|hypermarket|hypmrt|\bmarket\b|\bmall\b|\bstore\b|\bshop\b|\bnoon\b/i, "Shopping"],
+  [/electricity|water\b|telecom|internet|\bmobile\b|dewa|etisalat|\bdu\b|e&|digital app|anthropic|claude sub/i, "Bills"],
   [/netflix|spotify|youtube|instagram|google\*/i, "Fun"],
   [/pharmacy|hospital|clinic|medical|health|doctor/i, "Health"],
   [/careem pay|remit|exchange|western union|moneygram|money transfer|send.*home/i, "Remittance"],
