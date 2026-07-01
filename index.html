@@ -6,7 +6,7 @@
   <meta name="description" content="A simple, private expense tracker that runs in your browser." />
   <title>Rukku's Expense Tracker</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=1780933005" />
+  <link rel="stylesheet" href="style.css?v=1782925377" />
 </head>
 <body>
   <div class="app">
@@ -70,6 +70,14 @@
           <button type="button" class="chip" data-category="Investment">📈 Investment</button>
           <button type="button" class="chip" data-category="Self Improvement">📚 Self Improvement</button>
           <button type="button" class="chip" data-category="Other">📦 Other</button>
+          <button type="button" class="chip chip-add" id="addCategoryBtn">＋ Add</button>
+        </div>
+        <!-- Inline new-category form (hidden by default) -->
+        <div id="newCatForm" class="new-cat-form" hidden>
+          <input type="text" id="newCatEmoji" class="new-cat-emoji" placeholder="😊" maxlength="2" />
+          <input type="text" id="newCatName" class="new-cat-name" placeholder="Category name" maxlength="30" />
+          <button type="button" id="newCatSave" class="new-cat-save">Save</button>
+          <button type="button" id="newCatCancel" class="new-cat-cancel">✕</button>
         </div>
         <input type="hidden" id="categoryInput" value="Food" />
         <div class="form-row">
@@ -181,6 +189,6 @@
   <!-- Toast container -->
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
 
-  <script src="app.js?v=1780933005"></script>
+  <script src="app.js?v=1782925377"></script>
 </body>
 </html>

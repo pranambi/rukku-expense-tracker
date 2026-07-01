@@ -204,6 +204,51 @@ input:focus, select:focus { border-color: var(--accent); }
   font-weight: 700;
   box-shadow: 0 4px 14px #22c55e44;
 }
+.chip-add {
+  border-style: dashed;
+  color: var(--accent);
+  border-color: var(--accent);
+  opacity: 0.7;
+}
+.chip-add:hover { opacity: 1; }
+
+.new-cat-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.new-cat-emoji {
+  width: 56px;
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 10px 8px;
+  flex: 0 0 auto;
+}
+.new-cat-name {
+  flex: 1;
+  min-width: 120px;
+}
+.new-cat-save {
+  background: var(--accent-2);
+  border: none;
+  color: #04240f;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 10px;
+  flex: 0 0 auto;
+}
+.new-cat-cancel {
+  background: var(--panel-2);
+  border: 1px solid #ffffff18;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 10px;
+  flex: 0 0 auto;
+}
 button[type="submit"] {
   flex: 1;
   background: var(--accent-2);

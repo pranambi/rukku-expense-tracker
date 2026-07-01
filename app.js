@@ -4,6 +4,7 @@
 
 const STORAGE_KEY = "expenses.v1";
 const SETTINGS_KEY = "expenses.settings.v1";
+const CUSTOM_CATS_KEY = "expenses.customcats.v1";
 
 // Emoji for each category (used in the list and breakdown)
 const CATEGORY_EMOJI = {
@@ -90,13 +91,34 @@ const CATEGORY_COLOR = {
   Other: "#94a3b8",
 };
 
+const CUSTOM_COLORS = [
+  "#e879f9","#fb7185","#34d399","#fbbf24","#60a5fa",
+  "#f472b6","#a3e635","#2dd4bf","#c084fc","#facc15",
+];
+
 const toastHost = $("toastHost");
+const addCategoryBtn = $("addCategoryBtn");
+const newCatForm = $("newCatForm");
+const newCatEmoji = $("newCatEmoji");
+const newCatName = $("newCatName");
+const newCatSave = $("newCatSave");
+const newCatCancel = $("newCatCancel");
 
 // --- State ---
 let expenses = load(STORAGE_KEY, []);
 let settings = load(SETTINGS_KEY, { currency: "₹", budget: 0 });
+let customCats = load(CUSTOM_CATS_KEY, []); // [{name, emoji}]
 let activeMonth = monthKey(Date.now());
 let incomeMode = false;
+
+function catEmoji(name) {
+  return CATEGORY_EMOJI[name] ?? (customCats.find(c => c.name === name)?.emoji || "🏷️");
+}
+function catColor(name) {
+  if (CATEGORY_COLOR[name]) return CATEGORY_COLOR[name];
+  const idx = customCats.findIndex(c => c.name === name);
+  return CUSTOM_COLORS[idx % CUSTOM_COLORS.length] ?? "#94a3b8";
+}
 
 // --- Storage helpers ---
 function load(key, fallback) {
@@ -130,7 +152,26 @@ function todayISO() {
 }
 
 // ============ Category chips ============
-// The hidden #categoryInput holds the value; chips are the clickable UI.
+function renderCustomChips() {
+  // Remove previously injected custom chips (before the "+ Add" button)
+  for (const el of [...categoryChips.querySelectorAll(".chip-custom")]) el.remove();
+  // Rebuild filter dropdown custom options
+  for (const el of [...filterCategory.querySelectorAll(".opt-custom")]) el.remove();
+  for (const cc of customCats) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip chip-custom";
+    btn.dataset.category = cc.name;
+    btn.textContent = `${cc.emoji} ${cc.name}`;
+    categoryChips.insertBefore(btn, addCategoryBtn);
+    const opt = document.createElement("option");
+    opt.className = "opt-custom";
+    opt.value = cc.name;
+    opt.textContent = `${cc.emoji} ${cc.name}`;
+    filterCategory.appendChild(opt);
+  }
+}
+
 function setCategory(cat) {
   categoryInput.value = cat;
   for (const chip of categoryChips.children) {
@@ -138,9 +179,41 @@ function setCategory(cat) {
   }
 }
 categoryChips.addEventListener("click", (e) => {
-  const chip = e.target.closest(".chip");
+  const chip = e.target.closest(".chip:not(.chip-add)");
   if (chip) setCategory(chip.dataset.category);
 });
+
+// ---- Add-category inline form ----
+addCategoryBtn.addEventListener("click", () => {
+  newCatForm.hidden = false;
+  addCategoryBtn.hidden = true;
+  newCatEmoji.value = "";
+  newCatName.value = "";
+  newCatEmoji.focus();
+});
+newCatCancel.addEventListener("click", closeNewCatForm);
+newCatSave.addEventListener("click", saveNewCat);
+newCatName.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); saveNewCat(); } });
+
+function closeNewCatForm() {
+  newCatForm.hidden = true;
+  addCategoryBtn.hidden = false;
+}
+
+function saveNewCat() {
+  const emoji = newCatEmoji.value.trim() || "🏷️";
+  const name = newCatName.value.trim();
+  if (!name) { newCatName.focus(); return; }
+  if (customCats.find(c => c.name.toLowerCase() === name.toLowerCase()) || CATEGORY_EMOJI[name]) {
+    toast("⚠️ Category already exists"); return;
+  }
+  customCats.push({ name, emoji });
+  localStorage.setItem(CUSTOM_CATS_KEY, JSON.stringify(customCats));
+  renderCustomChips();
+  closeNewCatForm();
+  setCategory(name);
+  toast(`✅ "${emoji} ${name}" added`);
+}
 
 function setIncomeMode(on) {
   incomeMode = on;
@@ -397,7 +470,8 @@ function parseCSV(text) {
     if (cols.length < 3) continue;
     const desc = (cols[0] || "").trim();
     const amount = parseFloat(cols[1]);
-    const category = CATEGORY_EMOJI[cols[2]] ? cols[2].trim() : "Other";
+    const rawCat = cols[2] ? cols[2].trim() : "";
+    const category = (CATEGORY_EMOJI[rawCat] || customCats.find(c => c.name === rawCat)) ? rawCat : "Other";
     const date = cols[3] ? new Date(cols[3]).getTime() : Date.now();
     if (!desc || isNaN(amount) || amount <= 0) continue;
     expenses.unshift({ id: Date.now() + i, desc, amount, category, date: isNaN(date) ? Date.now() : date });
@@ -525,7 +599,7 @@ function renderDonut(byCategory, total) {
       const start = (acc / visibleTotal) * 360;
       acc += amt;
       const end = (acc / visibleTotal) * 360;
-      return `${CATEGORY_COLOR[cat]} ${start}deg ${end}deg`;
+      return `${catColor(cat)} ${start}deg ${end}deg`;
     });
     donutEl.style.background = `conic-gradient(${segments.join(", ")})`;
     donutTotalEl.textContent = money(visibleTotal);
@@ -541,8 +615,8 @@ function renderDonut(byCategory, total) {
     const row = document.createElement("div");
     row.className = "legend-row" + (isHidden ? " legend-hidden" : "");
     row.innerHTML = `
-      <span class="legend-dot" style="background:${isHidden ? "var(--muted)" : CATEGORY_COLOR[cat]}"></span>
-      <span class="legend-name">${CATEGORY_EMOJI[cat]} ${cat}</span>
+      <span class="legend-dot" style="background:${isHidden ? "var(--muted)" : catColor(cat)}"></span>
+      <span class="legend-name">${catEmoji(cat)} ${cat}</span>
       <span class="legend-val">${money(amt)}${isHidden ? "" : ` · ${pct.toFixed(0)}%`}</span>`;
     row.addEventListener("click", () => {
       if (hiddenCategories.has(cat)) hiddenCategories.delete(cat);
@@ -568,7 +642,7 @@ function renderSummaryCards(byCategory) {
   totalBalanceEl.textContent = money(Math.abs(balance));
   totalBalanceEl.classList.toggle("negative", balance < 0);
   expenseCountEl.textContent = expenses.filter((e) => !e.credit && !hiddenCategories.has(e.category) && monthKey(e.date) === activeMonth).length;
-  topCategoryEl.textContent = topCat ? `${CATEGORY_EMOJI[topCat]} ${topCat}` : "—";
+  topCategoryEl.textContent = topCat ? `${catEmoji(topCat)} ${topCat}` : "—";
 }
 
 function render() {
@@ -604,7 +678,7 @@ function renderList() {
       ? `<div class="exp-fx">${exp.origAmount.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${exp.origCurrency} @ ${exp.fxRate}</div>`
       : "";
     li.innerHTML = `
-      <span class="exp-emoji">${isCredit ? "💰" : CATEGORY_EMOJI[exp.category]}</span>
+      <span class="exp-emoji">${isCredit ? "💰" : catEmoji(exp.category)}</span>
       <div class="exp-main">
         <div class="exp-desc"></div>
         <div class="exp-meta">${isCredit ? "Income" : exp.category} · ${formatDate(exp.date)}</div>
@@ -652,6 +726,7 @@ function init() {
   currencySelect.value = settings.currency;
   budgetInput.value = settings.budget || "";
   dateInput.value = todayISO();
+  renderCustomChips();
   setCategory("Food");
   render();
 }
