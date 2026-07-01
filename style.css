@@ -372,8 +372,8 @@ button[type="submit"]:active { transform: scale(.97); }
 .clear-option + .clear-option { border-top: 1px solid #ffffff12; }
 .clear-all { color: var(--danger) !important; }
 .clear-all:hover { background: #ef444418 !important; }
-.link-btn { background: none; border: none; color: var(--danger); cursor: pointer; padding: 0; font-size: .85rem; }
-.link-btn:hover { text-decoration: underline; }
+.link-btn { background: none; border: none; color: var(--danger); cursor: pointer; padding: 0; font-size: .85rem; text-decoration: none; }
+.link-btn:hover { opacity: .8; }
 ul { list-style: none; }
 li.expense {
   display: flex;
