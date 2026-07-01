@@ -163,7 +163,14 @@ function renderCustomChips() {
     btn.type = "button";
     btn.className = "chip chip-custom";
     btn.dataset.category = cc.name;
-    btn.textContent = `${cc.emoji} ${cc.name}`;
+    const label = document.createTextNode(`${cc.emoji} ${cc.name} `);
+    const del = document.createElement("span");
+    del.className = "chip-del";
+    del.textContent = "✕";
+    del.title = "Remove category";
+    del.addEventListener("click", (e) => { e.stopPropagation(); deleteCustomCat(cc.name); });
+    btn.appendChild(label);
+    btn.appendChild(del);
     categoryChips.insertBefore(btn, addCategoryBtn);
     const opt = document.createElement("option");
     opt.className = "opt-custom";
@@ -186,11 +193,11 @@ categoryChips.addEventListener("click", (e) => {
 
 // ---- Add-category inline form ----
 addCategoryBtn.addEventListener("click", () => {
-  newCatForm.hidden = false;
-  addCategoryBtn.hidden = true;
+  newCatForm.classList.add("open");
+  addCategoryBtn.style.display = "none";
   newCatEmojiBtn.textContent = "😊";
   newCatName.value = "";
-  emojiGrid.hidden = true;
+  closeEmojiGrid();
   newCatName.focus();
 });
 
@@ -215,25 +222,33 @@ const EMOJI_OPTIONS = [
     span.textContent = em;
     emojiGrid.appendChild(span);
   }
+  document.body.appendChild(emojiGrid); // move to body so position:fixed works correctly
 })();
+
+function closeEmojiGrid() { emojiGrid.classList.remove("open"); }
 
 newCatEmojiBtn.addEventListener("click", (e) => {
   e.stopPropagation();
-  emojiGrid.hidden = !emojiGrid.hidden;
+  if (emojiGrid.classList.contains("open")) { closeEmojiGrid(); return; }
+  // Position the grid below the button using fixed coords
+  const r = newCatEmojiBtn.getBoundingClientRect();
+  emojiGrid.style.top = (r.bottom + 6) + "px";
+  emojiGrid.style.left = r.left + "px";
+  emojiGrid.classList.add("open");
 });
 
 emojiGrid.addEventListener("click", (e) => {
   const cell = e.target.closest(".emoji-cell");
   if (cell) {
     newCatEmojiBtn.textContent = cell.textContent;
-    emojiGrid.hidden = true;
+    closeEmojiGrid();
     newCatName.focus();
   }
 });
 
 document.addEventListener("click", (e) => {
-  if (!emojiGrid.hidden && !emojiGrid.contains(e.target) && e.target !== newCatEmojiBtn) {
-    emojiGrid.hidden = true;
+  if (emojiGrid.classList.contains("open") && !emojiGrid.contains(e.target) && e.target !== newCatEmojiBtn) {
+    closeEmojiGrid();
   }
 });
 
@@ -242,9 +257,9 @@ newCatSave.addEventListener("click", saveNewCat);
 newCatName.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); saveNewCat(); } });
 
 function closeNewCatForm() {
-  newCatForm.hidden = true;
-  addCategoryBtn.hidden = false;
-  emojiGrid.hidden = true;
+  newCatForm.classList.remove("open");
+  addCategoryBtn.style.display = "";
+  closeEmojiGrid();
 }
 
 function saveNewCat() {
@@ -260,6 +275,14 @@ function saveNewCat() {
   closeNewCatForm();
   setCategory(name);
   toast(`✅ "${emoji} ${name}" added`);
+}
+
+function deleteCustomCat(name) {
+  customCats = customCats.filter(c => c.name !== name);
+  localStorage.setItem(CUSTOM_CATS_KEY, JSON.stringify(customCats));
+  if (categoryInput.value === name) setCategory("Food");
+  renderCustomChips();
+  toast(`🗑️ "${name}" removed`);
 }
 
 function setIncomeMode(on) {
