@@ -5,6 +5,7 @@
 const STORAGE_KEY = "expenses.v1";
 const SETTINGS_KEY = "expenses.settings.v1";
 const CUSTOM_CATS_KEY = "expenses.customcats.v1";
+const IMPORT_HASHES_KEY = "expenses.importhashes.v1";
 
 // Emoji for each category (used in the list and breakdown)
 const CATEGORY_EMOJI = {
@@ -118,8 +119,19 @@ const newCatSave = $("newCatSave");
 let expenses = load(STORAGE_KEY, []);
 let settings = load(SETTINGS_KEY, { currency: "₹", budget: 0 });
 let customCats = load(CUSTOM_CATS_KEY, []); // [{name, emoji}]
+let importHashes = load(IMPORT_HASHES_KEY, []); // array of previously imported CSV checksums
 let activeMonth = monthKey(Date.now());
 let incomeMode = false;
+
+function csvChecksum(text) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h.toString(16);
+}
+function saveImportHashes() { localStorage.setItem(IMPORT_HASHES_KEY, JSON.stringify(importHashes)); }
 
 function catEmoji(name) {
   return CATEGORY_EMOJI[name] ?? (customCats.find(c => c.name === name)?.emoji || "🏷️");
@@ -528,9 +540,21 @@ importFile.addEventListener("change", (e) => {
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const added = parseCSV(reader.result);
-      if (added > 0) { saveExpenses(); render(); toast(`⬆️ Imported ${added} expense${added > 1 ? "s" : ""}`); }
-      else toast("No valid rows found in that file");
+      const text = reader.result;
+      const hash = csvChecksum(text);
+      const alreadySeen = importHashes.includes(hash);
+      if (alreadySeen) {
+        const proceed = confirm("This CSV looks like it was already imported before.\n\nImport it again anyway?");
+        if (!proceed) { importFile.value = ""; return; }
+      }
+      const added = parseCSV(text);
+      if (added > 0) {
+        if (!importHashes.includes(hash)) { importHashes.push(hash); saveImportHashes(); }
+        saveExpenses(); render();
+        toast(`⬆️ Imported ${added} expense${added > 1 ? "s" : ""}`);
+      } else {
+        toast("No valid rows found in that file");
+      }
     } catch {
       toast("⚠️ Couldn't read that CSV");
     }
