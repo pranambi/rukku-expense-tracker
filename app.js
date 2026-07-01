@@ -210,7 +210,6 @@ for (const em of EMOJI_OPTIONS) {
   span.textContent = em;
   emojiGrid.appendChild(span);
 }
-document.body.appendChild(emojiGrid);
 
 function openEmojiGrid() {
   const r = newCatEmojiBtn.getBoundingClientRect();

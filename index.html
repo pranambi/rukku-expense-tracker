@@ -6,7 +6,7 @@
   <meta name="description" content="A simple, private expense tracker that runs in your browser." />
   <title>Rukku's Expense Tracker</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=1782926816" />
+  <link rel="stylesheet" href="style.css?v=1782927180" />
 </head>
 <body>
   <div class="app">
@@ -78,8 +78,6 @@
           <input type="text" id="newCatName" class="new-cat-name" placeholder="Category name" maxlength="30" />
           <button type="button" id="newCatSave" class="new-cat-save">Save</button>
         </div>
-        <!-- Emoji picker grid, appended to body via JS -->
-        <div id="emojiGrid" class="emoji-grid"></div>
         <input type="hidden" id="categoryInput" value="Food" />
         <div class="form-row">
           <input type="date" id="dateInput" />
@@ -189,7 +187,9 @@
 
   <!-- Toast container -->
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
+  <!-- Emoji grid lives here as direct body child so position:fixed works correctly -->
+  <div id="emojiGrid" class="emoji-grid"></div>
 
-  <script src="app.js?v=1782926816"></script>
+  <script src="app.js?v=1782927180"></script>
 </body>
 </html>
