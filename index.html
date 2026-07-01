@@ -6,7 +6,7 @@
   <meta name="description" content="A simple, private expense tracker that runs in your browser." />
   <title>Rukku's Expense Tracker</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=1782925377" />
+  <link rel="stylesheet" href="style.css?v=1782925730" />
 </head>
 <body>
   <div class="app">
@@ -74,7 +74,10 @@
         </div>
         <!-- Inline new-category form (hidden by default) -->
         <div id="newCatForm" class="new-cat-form" hidden>
-          <input type="text" id="newCatEmoji" class="new-cat-emoji" placeholder="😊" maxlength="2" />
+          <div class="emoji-picker-wrap">
+            <button type="button" id="newCatEmojiBtn" class="new-cat-emoji-btn">😊</button>
+            <div id="emojiGrid" class="emoji-grid" hidden></div>
+          </div>
           <input type="text" id="newCatName" class="new-cat-name" placeholder="Category name" maxlength="30" />
           <button type="button" id="newCatSave" class="new-cat-save">Save</button>
           <button type="button" id="newCatCancel" class="new-cat-cancel">✕</button>
@@ -189,6 +192,6 @@
   <!-- Toast container -->
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
 
-  <script src="app.js?v=1782925377"></script>
+  <script src="app.js?v=1782925730"></script>
 </body>
 </html>
