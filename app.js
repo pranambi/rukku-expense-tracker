@@ -99,11 +99,9 @@ const CUSTOM_COLORS = [
 const toastHost = $("toastHost");
 const addCategoryBtn = $("addCategoryBtn");
 const newCatForm = $("newCatForm");
-const newCatEmojiBtn = $("newCatEmojiBtn");
-const emojiGrid = $("emojiGrid");
+const newCatEmoji = $("newCatEmoji");
 const newCatName = $("newCatName");
 const newCatSave = $("newCatSave");
-const newCatCancel = $("newCatCancel");
 
 // --- State ---
 let expenses = load(STORAGE_KEY, []);
@@ -193,77 +191,22 @@ categoryChips.addEventListener("click", (e) => {
 
 // ---- Add-category inline form ----
 addCategoryBtn.addEventListener("click", () => {
+  if (newCatForm.classList.contains("open")) { closeNewCatForm(); return; }
   newCatForm.classList.add("open");
-  addCategoryBtn.style.display = "none";
-  newCatEmojiBtn.textContent = "😊";
+  newCatEmoji.value = "";
   newCatName.value = "";
-  closeEmojiGrid();
-  newCatName.focus();
+  newCatEmoji.focus();
 });
 
-const EMOJI_OPTIONS = [
-  "🍔","🍕","🍜","🍣","🍩","🍺","☕","🥗","🍗","🥩",
-  "🚗","🚕","🚌","🚂","✈️","🚲","🛵","🚀","🚢","🏍️",
-  "🛍️","👗","👠","💄","🛒","🎁","🪄","💍","👒","🧣",
-  "🧾","💡","🔌","💧","🏠","📱","💻","🖨️","📡","🔑",
-  "🎮","🎬","🎵","🎨","🎭","🎲","🃏","🎯","⚽","🏀",
-  "💊","🏥","🧘","🏋️","🩺","💉","🩹","🧬","🫀","🦷",
-  "🏡","🌳","🌻","🪴","🌊","🏔️","🌈","🌙","⭐","🔥",
-  "📈","📊","💹","💰","🏦","💳","🪙","📉","🤝","📋",
-  "📚","📖","✏️","🎓","🧪","🔭","🏆","🎤","🎙️","📝",
-  "🐶","🐱","🐟","🌺","🦋","🐘","🦁","🐧","🐝","🦊",
-  "🏷️","✨","💫","🎪","🎠","🎡","🎢","🎃","🎄","🌟",
-];
-
-(function buildEmojiGrid() {
-  for (const em of EMOJI_OPTIONS) {
-    const span = document.createElement("span");
-    span.className = "emoji-cell";
-    span.textContent = em;
-    emojiGrid.appendChild(span);
-  }
-  document.body.appendChild(emojiGrid); // move to body so position:fixed works correctly
-})();
-
-function closeEmojiGrid() { emojiGrid.classList.remove("open"); }
-
-newCatEmojiBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  if (emojiGrid.classList.contains("open")) { closeEmojiGrid(); return; }
-  // Position the grid below the button using fixed coords
-  const r = newCatEmojiBtn.getBoundingClientRect();
-  emojiGrid.style.top = (r.bottom + 6) + "px";
-  emojiGrid.style.left = r.left + "px";
-  emojiGrid.classList.add("open");
-});
-
-emojiGrid.addEventListener("click", (e) => {
-  const cell = e.target.closest(".emoji-cell");
-  if (cell) {
-    newCatEmojiBtn.textContent = cell.textContent;
-    closeEmojiGrid();
-    newCatName.focus();
-  }
-});
-
-document.addEventListener("click", (e) => {
-  if (emojiGrid.classList.contains("open") && !emojiGrid.contains(e.target) && e.target !== newCatEmojiBtn) {
-    closeEmojiGrid();
-  }
-});
-
-newCatCancel.addEventListener("click", closeNewCatForm);
 newCatSave.addEventListener("click", saveNewCat);
 newCatName.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); saveNewCat(); } });
 
 function closeNewCatForm() {
   newCatForm.classList.remove("open");
-  addCategoryBtn.style.display = "";
-  closeEmojiGrid();
 }
 
 function saveNewCat() {
-  const emoji = newCatEmojiBtn.textContent.trim() || "🏷️";
+  const emoji = [...(newCatEmoji.value.trim())][0] || "🏷️";
   const name = newCatName.value.trim();
   if (!name) { newCatName.focus(); return; }
   if (customCats.find(c => c.name.toLowerCase() === name.toLowerCase()) || CATEGORY_EMOJI[name]) {

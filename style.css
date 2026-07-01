@@ -216,69 +216,23 @@ input:focus, select:focus { border-color: var(--accent); }
 /* new-cat form: hidden by default, shown via .open class */
 .new-cat-form { display: none; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
 .new-cat-form.open { display: flex; }
-
-.emoji-picker-wrap { position: static; flex: 0 0 auto; }
-.new-cat-emoji-btn {
-  width: 52px;
-  height: 52px;
-  font-size: 1.4rem;
-  border-radius: 10px;
-  border: 2px solid var(--accent);
-  background: var(--panel-2);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  transition: border-color .15s;
-  position: relative;
+.new-cat-emoji-input {
+  width: 58px;
+  text-align: center;
+  font-size: 1.3rem;
+  padding: 10px 6px;
+  flex: 0 0 auto;
 }
-.new-cat-emoji-btn::after {
-  content: "▾";
-  position: absolute;
-  bottom: -1px;
-  right: 3px;
-  font-size: .55rem;
-  color: var(--accent);
-  line-height: 1;
-}
-.new-cat-emoji-btn:hover { border-color: var(--accent-2); }
-
-/* emoji grid: hidden by default, shown via .open class */
-.emoji-grid {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  background: var(--panel);
-  border: 1px solid #ffffff30;
-  border-radius: 12px;
-  padding: 10px;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 4px;
-  box-shadow: 0 8px 30px #000000a0;
-  width: 300px;
-}
-.emoji-grid.open { display: grid; }
-.emoji-cell {
-  width: 26px;
-  height: 26px;
-  font-size: 1.2rem;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  cursor: pointer;
-  line-height: 1;
-}
-.emoji-cell:hover { background: #ffffff18; }
 
 /* delete button on custom chips */
-.chip-custom { padding-right: 8px; display: inline-flex; align-items: center; gap: 5px; }
+.chip-custom { display: inline-flex; align-items: center; gap: 5px; }
 .chip-del {
   font-size: .7rem;
   background: none;
   border: none;
   color: var(--muted);
   cursor: pointer;
-  padding: 0 0 0 2px;
+  padding: 0;
   line-height: 1;
   border-radius: 50%;
   width: 14px;
@@ -286,7 +240,7 @@ input:focus, select:focus { border-color: var(--accent); }
   display: grid;
   place-items: center;
 }
-.chip-del:hover { color: var(--danger); background: #ef444430; }
+.chip-del:hover { color: var(--danger); }
 .new-cat-name {
   flex: 1;
   min-width: 120px;
