@@ -70,6 +70,9 @@ const noMatchStateEl = $("noMatchState");
 const shownCountEl = $("shownCount");
 const clearAllBtn = $("clearAllBtn");
 const clearMonthBtn = $("clearMonthBtn");
+const clearWrap = $("clearWrap");
+const clearTrigger = $("clearTrigger");
+const clearMenu = $("clearMenu");
 
 const breakdownSection = $("breakdownSection");
 const donutWrap = $("donutWrap");
@@ -359,14 +362,20 @@ function deleteExpense(id) {
   });
 }
 
+clearTrigger.addEventListener("click", (e) => {
+  e.stopPropagation();
+  clearMenu.hidden = !clearMenu.hidden;
+});
+document.addEventListener("click", () => { clearMenu.hidden = true; });
+
 clearMonthBtn.addEventListener("click", () => {
+  clearMenu.hidden = true;
   const monthExpenses = expenses.filter(e => monthKey(e.date) === activeMonth);
   if (!monthExpenses.length) return;
-  if (confirm(`Delete all expenses for ${monthLabel(activeMonth)}? This cannot be undone.`)) {
+  if (confirm(`Delete all expenses for ${monthLabel(activeMonth)}?`)) {
     const backup = expenses.slice();
     expenses = expenses.filter(e => monthKey(e.date) !== activeMonth);
-    saveExpenses();
-    render();
+    saveExpenses(); render();
     toast(`🗑️ ${monthLabel(activeMonth)} cleared`, {
       actionLabel: "Undo",
       onAction: () => { expenses = backup; saveExpenses(); render(); toast("↩️ Restored"); },
@@ -375,12 +384,12 @@ clearMonthBtn.addEventListener("click", () => {
 });
 
 clearAllBtn.addEventListener("click", () => {
+  clearMenu.hidden = true;
   if (!expenses.length) return;
-  if (confirm("Delete ALL expenses across every month? This cannot be undone.")) {
+  if (confirm("Delete ALL expenses across every month?")) {
     const backup = expenses.slice();
     expenses = [];
-    saveExpenses();
-    render();
+    saveExpenses(); render();
     toast("🗑️ All expenses cleared", {
       actionLabel: "Undo",
       onAction: () => { expenses = backup; saveExpenses(); render(); toast("↩️ Restored"); },
@@ -556,9 +565,9 @@ function parseCSV(text) {
 const BANK_CATEGORY_RULES = [
   [/\btaxi\b|\buber\b|\bmetro\b|\bbus\b|transport|airline|flight|careem.*cab|cab\b/i, "Transport"],
   [/restaurant|cafeteria|catering|sweets|bakery|\bfood\b|burger|pizza|\bcafe\b|coffee|diner|corn\b|talabat/i, "Food"],
-  [/supermarket|hypermarket|hypmrt|\bmarket\b|\bmall\b|\bstore\b|\bshop\b|\bnoon\b|\bmmi\b|retail/i, "Shopping"],
+  [/supermarket|hypermarket|hypmrt|\bmarket\b|\bmall\b|\bstore\b|\bshop\b|\bnoon\b|retail/i, "Shopping"],
   [/electricity|water\b|telecom|internet|\bmobile\b|dewa|etisalat|\bdu\b|e&|digital app|anthropic|claude sub/i, "Bills"],
-  [/netflix|spotify|youtube|instagram|google\*/i, "Fun"],
+  [/netflix|spotify|youtube|instagram|google\*|\bmmi\b/i, "Fun"],
   [/pharmacy|hospital|clinic|medical|health|doctor/i, "Health"],
   [/careem pay|remit|exchange|western union|moneygram|money transfer|send.*home/i, "Remittance"],
   [/broker|invest|trading|\bstock\b|mutual fund|securities|portfolio/i, "Investment"],
@@ -736,8 +745,7 @@ function renderList() {
   const hasAny = monthExpenses.length > 0;
   const hasShown = filtered.length > 0;
 
-  clearMonthBtn.hidden = !monthExpenses.length;
-  clearAllBtn.hidden = !expenses.length;
+  clearWrap.hidden = !expenses.length;
   emptyStateEl.hidden = hasAny;
   emptyStateEl.textContent = `No expenses for ${monthLabel(activeMonth)} yet. Add one above! 👆`;
   noMatchStateEl.hidden = !(hasAny && !hasShown);
