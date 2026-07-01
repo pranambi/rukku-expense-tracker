@@ -409,7 +409,7 @@ budgetInput.addEventListener("input", () => {
 function renderBudget() {
   budgetSymbol.textContent = settings.currency;
   const spentThisMonth = expenses
-    .filter((e) => !e.credit && monthKey(e.date) === activeMonth)
+    .filter((e) => !e.credit && monthKey(e.date) === activeMonth && !hiddenCategories.has(e.category))
     .reduce((s, e) => s + e.amount, 0);
 
   // No budget set → friendly prompt, hide the figures
@@ -709,6 +709,7 @@ function renderDonut(byCategory, total) {
       const { byCategory: bc, total: t } = getStats();
       renderDonut(bc, t);
       renderSummaryCards(bc);
+      renderBudget();
       renderList();
     });
     legendEl.appendChild(row);
