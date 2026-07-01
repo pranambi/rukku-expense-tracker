@@ -230,6 +230,7 @@ emojiGrid.addEventListener("click", (e) => {
 document.addEventListener("click", (e) => {
   if (emojiGrid.classList.contains("open") && !emojiGrid.contains(e.target) && e.target !== newCatEmojiBtn) closeEmojiGrid();
 });
+window.addEventListener("scroll", closeEmojiGrid, { passive: true });
 
 // ---- Add-category inline form ----
 addCategoryBtn.addEventListener("click", () => {
